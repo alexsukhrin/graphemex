@@ -1,6 +1,7 @@
 # graphemex
 
 [![GitHub](https://img.shields.io/badge/GitHub-graphemex-blue)](https://github.com/alexsukhrin/graphemex)
+[![PyPI](https://img.shields.io/pypi/v/graphemex)](https://pypi.org/project/graphemex/)
 
 Fast Unicode grapheme cluster segmentation library written in Rust using PyO3.
 
@@ -19,10 +20,17 @@ Fast Unicode grapheme cluster segmentation library written in Rust using PyO3.
 
 ## Features
 
-- `split(text: str) -> List[str]`: Splits text into grapheme clusters
-- `len(text: str) -> int`: Returns the number of grapheme clusters in the string
-- `slice(text: str, start: int, end: int) -> str`: Extracts a substring by grapheme cluster indices
-- `truncate(text: str, max_len: int) -> str`: Truncates string to maximum number of grapheme clusters
+### Single Operations
+* `split(text: str) -> List[str]`: Splits text into grapheme clusters
+* `grapheme_len(text: str) -> int`: Returns the number of grapheme clusters in the string
+* `slice(text: str, start: int, end: int) -> str`: Extracts a substring by grapheme cluster indices
+* `truncate(text: str, max_len: int) -> str`: Truncates string to specified maximum number of grapheme clusters
+
+### Batch Operations
+* `batch_split(texts: List[str]) -> List[List[str]]`: Splits multiple texts into grapheme clusters
+* `batch_grapheme_len(texts: List[str]) -> List[int]`: Returns the number of grapheme clusters for multiple strings
+* `batch_slice(texts: List[str], start: int, end: int) -> List[str]`: Extracts substrings by grapheme cluster indices for multiple strings
+* `batch_truncate(texts: List[str], max_len: int) -> List[str]`: Truncates multiple strings to specified maximum number of grapheme clusters
 
 ## Installation
 
@@ -38,183 +46,186 @@ Fast Unicode grapheme cluster segmentation library written in Rust using PyO3.
 ## Performance
 
 `graphemex` is significantly faster than pure Python implementations:
-- Up to 100x faster for grapheme splitting
+- Up to 227.6x faster for batch operations
+- Up to 62.9x faster for single operations
 - Minimal memory overhead
 - Efficient handling of large texts
 
+### Batch vs Python Performance
+
+Running batch vs grapheme (Python) benchmarks...
+Each test runs 100 times (batch size: 1000)
+
+#### Split: Simple Batch
+| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 65.897 ms         | 348.297 ms        | 5.3x         |
+| Median | 64.438 ms         | 347.191 ms        | 5.4x         |
+| Min    | 58.534 ms         | 343.628 ms        | 5.9x         |
+| Max    | 109.630 ms        | 406.835 ms        | 3.7x         |
+| StdDev | 6.734 ms          | 6.405 ms          | N/A          |
+
+#### Grapheme Len: Simple Batch
+| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 4.531 ms          | 345.278 ms        | 76.2x        |
+| Median | 4.492 ms          | 345.251 ms        | 76.9x        |
+| Min    | 4.326 ms          | 340.078 ms        | 78.6x        |
+| Max    | 5.490 ms          | 350.240 ms        | 63.8x        |
+| StdDev | 0.194 ms          | 1.695 ms          | N/A          |
+
+#### Split: Emoji Batch
+| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 44.512 ms         | 878.896 ms        | 19.7x        |
+| Median | 44.512 ms         | 878.877 ms        | 19.7x        |
+| Min    | 43.058 ms         | 873.524 ms        | 20.3x        |
+| Max    | 47.180 ms         | 914.023 ms        | 19.4x        |
+| StdDev | 0.583 ms          | 4.161 ms          | N/A          |
+
+#### Grapheme Len: Emoji Batch
+| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 5.207 ms          | 872.983 ms        | 167.7x       |
+| Median | 5.175 ms          | 872.254 ms        | 168.5x       |
+| Min    | 5.046 ms          | 869.192 ms        | 172.3x       |
+| Max    | 5.965 ms          | 912.559 ms        | 153.0x       |
+| StdDev | 0.141 ms          | 4.485 ms          | N/A          |
+
+#### Split: Mixed Batch
+| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 110.419 ms        | 1481.557 ms       | 13.4x        |
+| Median | 109.929 ms        | 1476.163 ms       | 13.4x        |
+| Min    | 106.516 ms        | 1468.433 ms       | 13.8x        |
+| Max    | 137.677 ms        | 1540.124 ms       | 11.2x        |
+| StdDev | 3.572 ms          | 15.597 ms         | N/A          |
+
+#### Grapheme Len: Mixed Batch
+| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 6.440 ms          | 1465.842 ms       | 227.6x       |
+| Median | 6.393 ms          | 1459.345 ms       | 228.3x       |
+| Min    | 6.234 ms          | 1456.319 ms       | 233.6x       |
+| Max    | 7.144 ms          | 1543.400 ms       | 216.0x       |
+| StdDev | 0.161 ms          | 17.820 ms         | N/A          |
+
 ### Single Operations Performance
 
-Comparing graphemex (Rust) vs grapheme (Python) - 1000 iterations:
+Comparing graphemex (Rust) vs grapheme (Python)
 
 #### Simple Text - Split
 | Metric | graphemex (Rust) | grapheme (Python) | Times Faster |
 |--------|------------------|-------------------|--------------|
-| Mean   | 2.714 ms         | 3.461 ms          | 1.3x         |
-| Median | 2.700 ms         | 3.454 ms          | 1.3x         |
-| Min    | 2.627 ms         | 3.310 ms          | 1.3x         |
-| Max    | 5.687 ms         | 5.660 ms          | 1.0x         |
-| StdDev | 0.121 ms         | 0.102 ms          | N/A          |
+| Mean   | 0.291 ms         | 3.403 ms          | 11.7x        |
+| Median | 0.271 ms         | 3.397 ms          | 12.5x        |
+| Min    | 0.265 ms         | 3.309 ms          | 12.5x        |
+| Max    | 0.733 ms         | 3.633 ms          | 5.0x         |
+| StdDev | 0.058 ms         | 0.032 ms          | N/A          |
 
 #### Emoji Text - Split
 | Metric | graphemex (Rust) | grapheme (Python) | Times Faster |
 |--------|------------------|-------------------|--------------|
-| Mean   | 2.595 ms         | 8.621 ms          | 3.3x         |
-| Median | 2.526 ms         | 8.642 ms          | 3.4x         |
-| Min    | 2.446 ms         | 8.486 ms          | 3.5x         |
-| Max    | 3.730 ms         | 9.093 ms          | 2.4x         |
-| StdDev | 0.151 ms         | 0.071 ms          | N/A          |
+| Mean   | 0.297 ms         | 8.502 ms          | 28.6x        |
+| Median | 0.294 ms         | 8.488 ms          | 28.9x        |
+| Min    | 0.291 ms         | 8.444 ms          | 29.1x        |
+| Max    | 0.557 ms         | 9.024 ms          | 16.2x        |
+| StdDev | 0.014 ms         | 0.056 ms          | N/A          |
 
 #### Mixed Text - Split
 | Metric | graphemex (Rust) | grapheme (Python) | Times Faster |
 |--------|------------------|-------------------|--------------|
-| Mean   | 3.525 ms         | 14.382 ms         | 4.1x         |
-| Median | 3.529 ms         | 14.315 ms         | 4.1x         |
-| Min    | 3.441 ms         | 14.014 ms         | 4.1x         |
-| Max    | 3.884 ms         | 18.410 ms         | 4.7x         |
-| StdDev | 0.040 ms         | 0.495 ms          | N/A          |
+| Mean   | 0.617 ms         | 14.093 ms         | 22.8x        |
+| Median | 0.615 ms         | 14.064 ms         | 22.9x        |
+| Min    | 0.610 ms         | 14.004 ms         | 23.0x        |
+| Max    | 0.750 ms         | 14.763 ms         | 19.7x        |
+| StdDev | 0.009 ms         | 0.091 ms          | N/A          |
 
 #### Simple Text - Length
 | Metric | graphemex (Rust) | grapheme (Python) | Times Faster |
 |--------|------------------|-------------------|--------------|
-| Mean   | 2.210 ms         | 3.467 ms          | 1.6x         |
-| Median | 2.208 ms         | 3.465 ms          | 1.6x         |
-| Min    | 2.144 ms         | 3.369 ms          | 1.6x         |
-| Max    | 2.426 ms         | 3.826 ms          | 1.6x         |
-| StdDev | 0.029 ms         | 0.039 ms          | N/A          |
+| Mean   | 0.193 ms         | 3.442 ms          | 17.9x        |
+| Median | 0.191 ms         | 3.427 ms          | 17.9x        |
+| Min    | 0.191 ms         | 3.364 ms          | 17.6x        |
+| Max    | 0.245 ms         | 4.278 ms          | 17.5x        |
+| StdDev | 0.005 ms         | 0.064 ms          | N/A          |
 
 #### Emoji Text - Length
 | Metric | graphemex (Rust) | grapheme (Python) | Times Faster |
 |--------|------------------|-------------------|--------------|
-| Mean   | 2.192 ms         | 8.672 ms          | 4.0x         |
-| Median | 2.186 ms         | 8.678 ms          | 4.0x         |
-| Min    | 2.130 ms         | 8.495 ms          | 4.0x         |
-| Max    | 2.516 ms         | 9.439 ms          | 3.8x         |
-| StdDev | 0.036 ms         | 0.071 ms          | N/A          |
+| Mean   | 0.186 ms         | 8.551 ms          | 46.0x        |
+| Median | 0.184 ms         | 8.515 ms          | 46.2x        |
+| Min    | 0.183 ms         | 8.474 ms          | 46.2x        |
+| Max    | 0.254 ms         | 8.977 ms          | 35.3x        |
+| StdDev | 0.005 ms         | 0.077 ms          | N/A          |
 
 #### Mixed Text - Length
 | Metric | graphemex (Rust) | grapheme (Python) | Times Faster |
 |--------|------------------|-------------------|--------------|
-| Mean   | 2.700 ms         | 14.353 ms         | 5.3x         |
-| Median | 2.698 ms         | 14.340 ms         | 5.3x         |
-| Min    | 2.615 ms         | 14.050 ms         | 5.4x         |
-| Max    | 2.978 ms         | 15.605 ms         | 5.2x         |
-| StdDev | 0.035 ms         | 0.116 ms          | N/A          |
+| Mean   | 0.225 ms         | 14.178 ms         | 62.9x        |
+| Median | 0.224 ms         | 14.113 ms         | 63.1x        |
+| Min    | 0.223 ms         | 14.012 ms         | 62.7x        |
+| Max    | 0.337 ms         | 14.954 ms         | 44.4x        |
+| StdDev | 0.006 ms         | 0.137 ms          | N/A          |
 
 ### Batch vs Single Performance
 
-`graphemex` also provides batch functions for processing large arrays of strings. Here's a comparison of batch vs single functions (1000 strings per batch, 100 iterations):
+Running batch vs single benchmarks...
+Each test runs 100 times (batch size: 1000)
 
 #### Split: Simple Batch
-| Metric | Single (sum) | Batch    | Speedup |
-|--------|--------------|----------|---------|
-| Mean   | 250.123 ms   | 120.456 ms| 2.1x   |
-| Median | 248.789 ms   | 118.234 ms| 2.1x   |
-| Min    | 245.678 ms   | 115.890 ms| 2.1x   |
-| Max    | 255.432 ms   | 125.678 ms| 2.0x   |
-| StdDev | 2.345 ms     | 1.890 ms | N/A     |
-
-#### Split: Emoji Batch
-| Metric | Single (sum) | Batch    | Speedup |
-|--------|--------------|----------|---------|
-| Mean   | 350.789 ms   | 150.123 ms| 2.3x   |
-| Median | 348.567 ms   | 148.890 ms| 2.3x   |
-| Min    | 345.678 ms   | 145.234 ms| 2.4x   |
-| Max    | 355.890 ms   | 155.678 ms| 2.3x   |
-| StdDev | 2.567 ms     | 2.123 ms | N/A     |
-
-#### Split: Mixed Batch
-| Metric | Single (sum) | Batch    | Speedup |
-|--------|--------------|----------|---------|
-| Mean   | 450.123 ms   | 180.456 ms| 2.5x   |
-| Median | 448.789 ms   | 178.234 ms| 2.5x   |
-| Min    | 445.678 ms   | 175.890 ms| 2.5x   |
-| Max    | 455.432 ms   | 185.678 ms| 2.5x   |
-| StdDev | 2.345 ms     | 1.890 ms | N/A     |
+| Metric | graphemex (single) | graphemex (batch) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 0.291 ms          | 65.897 ms         | 0.004x       |
+| Median | 0.271 ms          | 64.438 ms         | 0.004x       |
+| Min    | 0.265 ms          | 58.534 ms         | 0.005x       |
+| Max    | 0.733 ms          | 109.630 ms        | 0.007x       |
+| StdDev | 0.058 ms          | 6.734 ms          | N/A          |
 
 #### Grapheme Len: Simple Batch
-| Metric | Single (sum) | Batch    | Speedup |
-|--------|--------------|----------|---------|
-| Mean   | 200.123 ms   | 100.456 ms| 2.0x   |
-| Median | 198.789 ms   | 98.234 ms | 2.0x   |
-| Min    | 195.678 ms   | 95.890 ms | 2.0x   |
-| Max    | 205.432 ms   | 105.678 ms| 1.9x   |
-| StdDev | 2.345 ms     | 1.890 ms | N/A     |
-
-#### Grapheme Len: Emoji Batch
-| Metric | Single (sum) | Batch    | Speedup |
-|--------|--------------|----------|---------|
-| Mean   | 300.789 ms   | 130.123 ms| 2.3x   |
-| Median | 298.567 ms   | 128.890 ms| 2.3x   |
-| Min    | 295.678 ms   | 125.234 ms| 2.4x   |
-| Max    | 305.890 ms   | 135.678 ms| 2.3x   |
-| StdDev | 2.567 ms     | 2.123 ms | N/A     |
-
-#### Grapheme Len: Mixed Batch
-| Metric | Single (sum) | Batch    | Speedup |
-|--------|--------------|----------|---------|
-| Mean   | 400.123 ms   | 160.456 ms| 2.5x   |
-| Median | 398.789 ms   | 158.234 ms| 2.5x   |
-| Min    | 395.678 ms   | 155.890 ms| 2.5x   |
-| Max    | 405.432 ms   | 165.678 ms| 2.4x   |
-| StdDev | 2.345 ms     | 1.890 ms | N/A     |
-
-### Batch vs Python Performance
-
-`graphemex` batch functions are significantly faster than pure Python implementations. Here's a comparison (1000 strings per batch, 100 iterations):
-
-#### Split: Simple Batch
-| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+| Metric | graphemex (single) | graphemex (batch) | Times Faster |
 |--------|-------------------|-------------------|--------------|
-| Mean   | 120.456 ms        | 350.789 ms        | 2.9x         |
-| Median | 118.234 ms        | 348.567 ms        | 2.9x         |
-| Min    | 115.890 ms        | 345.678 ms        | 3.0x         |
-| Max    | 125.678 ms        | 355.890 ms        | 2.8x         |
-| StdDev | 1.890 ms          | 2.567 ms          | N/A          |
+| Mean   | 0.193 ms          | 4.531 ms          | 0.043x       |
+| Median | 0.191 ms          | 4.492 ms          | 0.043x       |
+| Min    | 0.191 ms          | 4.326 ms          | 0.044x       |
+| Max    | 0.245 ms          | 5.490 ms          | 0.045x       |
+| StdDev | 0.005 ms          | 0.194 ms          | N/A          |
 
 #### Split: Emoji Batch
-| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+| Metric | graphemex (single) | graphemex (batch) | Times Faster |
 |--------|-------------------|-------------------|--------------|
-| Mean   | 150.123 ms        | 450.123 ms        | 3.0x         |
-| Median | 148.890 ms        | 448.789 ms        | 3.0x         |
-| Min    | 145.234 ms        | 445.678 ms        | 3.1x         |
-| Max    | 155.678 ms        | 455.432 ms        | 2.9x         |
-| StdDev | 2.123 ms          | 2.345 ms          | N/A          |
-
-#### Split: Mixed Batch
-| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
-|--------|-------------------|-------------------|--------------|
-| Mean   | 180.456 ms        | 550.789 ms        | 3.1x         |
-| Median | 178.234 ms        | 548.567 ms        | 3.1x         |
-| Min    | 175.890 ms        | 545.678 ms        | 3.1x         |
-| Max    | 185.678 ms        | 555.890 ms        | 3.0x         |
-| StdDev | 1.890 ms          | 2.567 ms          | N/A          |
-
-#### Grapheme Len: Simple Batch
-| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
-|--------|-------------------|-------------------|--------------|
-| Mean   | 100.456 ms        | 300.789 ms        | 3.0x         |
-| Median | 98.234 ms         | 298.567 ms        | 3.0x         |
-| Min    | 95.890 ms         | 295.678 ms        | 3.1x         |
-| Max    | 105.678 ms        | 305.890 ms        | 2.9x         |
-| StdDev | 1.890 ms          | 2.567 ms          | N/A          |
+| Mean   | 0.297 ms          | 44.512 ms         | 0.007x       |
+| Median | 0.294 ms          | 44.512 ms         | 0.007x       |
+| Min    | 0.291 ms          | 43.058 ms         | 0.007x       |
+| Max    | 0.557 ms          | 47.180 ms         | 0.012x       |
+| StdDev | 0.014 ms          | 0.583 ms          | N/A          |
 
 #### Grapheme Len: Emoji Batch
-| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+| Metric | graphemex (single) | graphemex (batch) | Times Faster |
 |--------|-------------------|-------------------|--------------|
-| Mean   | 130.123 ms        | 400.123 ms        | 3.1x         |
-| Median | 128.890 ms        | 398.789 ms        | 3.1x         |
-| Min    | 125.234 ms        | 395.678 ms        | 3.2x         |
-| Max    | 135.678 ms        | 405.432 ms        | 3.0x         |
-| StdDev | 2.123 ms          | 2.345 ms          | N/A          |
+| Mean   | 0.186 ms          | 5.207 ms          | 0.036x       |
+| Median | 0.184 ms          | 5.175 ms          | 0.036x       |
+| Min    | 0.183 ms          | 5.046 ms          | 0.036x       |
+| Max    | 0.254 ms          | 5.965 ms          | 0.043x       |
+| StdDev | 0.005 ms          | 0.141 ms          | N/A          |
+
+#### Split: Mixed Batch
+| Metric | graphemex (single) | graphemex (batch) | Times Faster |
+|--------|-------------------|-------------------|--------------|
+| Mean   | 0.617 ms          | 110.419 ms        | 0.006x       |
+| Median | 0.615 ms          | 109.929 ms        | 0.006x       |
+| Min    | 0.610 ms          | 106.516 ms        | 0.006x       |
+| Max    | 0.750 ms          | 137.677 ms        | 0.005x       |
+| StdDev | 0.009 ms          | 3.572 ms          | N/A          |
 
 #### Grapheme Len: Mixed Batch
-| Metric | graphemex (batch) | grapheme (Python) | Times Faster |
+| Metric | graphemex (single) | graphemex (batch) | Times Faster |
 |--------|-------------------|-------------------|--------------|
-| Mean   | 160.456 ms        | 500.789 ms        | 3.1x         |
-| Median | 158.234 ms        | 498.567 ms        | 3.2x         |
-| Min    | 155.890 ms        | 495.678 ms        | 3.2x         |
-| Max    | 165.678 ms        | 505.890 ms        | 3.1x         |
-| StdDev | 1.890 ms          | 2.567 ms          | N/A          |
+| Mean   | 0.225 ms          | 6.440 ms          | 0.035x       |
+| Median | 0.224 ms          | 6.393 ms          | 0.035x       |
+| Min    | 0.223 ms          | 6.234 ms          | 0.036x       |
+| Max    | 0.337 ms          | 7.144 ms          | 0.047x       |
+| StdDev | 0.006 ms          | 0.161 ms          | N/A          |
 
 ## Requirements
 

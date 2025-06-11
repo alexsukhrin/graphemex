@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "graphemex"
-version = "0.1.3"
+version = "0.1.5"
 description = "Fast Unicode grapheme cluster segmentation with Rust + PyO3"
 readme = "README.md"
 license = "MIT"
