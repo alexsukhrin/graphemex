@@ -1,5 +1,7 @@
 # graphemex
 
+[![GitHub](https://img.shields.io/badge/GitHub-graphemex-blue)](https://github.com/alexsukhrin/graphemex)
+
 Fast Unicode grapheme cluster segmentation library written in Rust using PyO3.
 
 ## About
