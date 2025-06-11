@@ -1,0 +1,27 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "graphemex"
+version = "0.1.3"
+description = "Fast Unicode grapheme cluster segmentation with Rust + PyO3"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Alexandr Sukhryn", email = "alexandrvirtual@gmail.com"}
+]
+requires-python = ">=3.7"
+keywords = ["unicode", "grapheme", "segmentation", "rust", "pyo3"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
