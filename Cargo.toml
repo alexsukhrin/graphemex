@@ -8,11 +8,11 @@ authors = ["Alexandr Sukhryn alexandrvirtual@gmail.com"]
 name = "graphemex"
 crate-type = ["cdylib"]
 
-[dependencies]
-unicode-segmentation = "1.10"
-pyo3 = { version = "0.25.0", features = ["extension-module", "abi3-py37"] }
-rayon = "1.8"
-
 [features]
 extension-module = ["pyo3/extension-module"]
 default = ["extension-module"]
+
+[dependencies]
+pyo3 = { version = "0.25.0", features = ["extension-module", "abi3-py37"] }
+rayon = "1.8"
+unicode-segmentation = "1.10"
